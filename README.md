@@ -33,8 +33,10 @@ source .venv/bin/activate
 Install the required Python packages using pip:
 pip install -r ./entri_flask/requirements.txt
 
+**5. Access the .env file and fill it with your ApplicationID and Secret**
+Feel free to use any text editor in your OS like Notepad for Windows or VIM for Linux.
 
-**5. Run the Application**
+**6. Run the Application**
 Start the application by running:
 python ./entri_flask/app.py
 
