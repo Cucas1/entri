@@ -16,25 +16,26 @@ git clone https://github.com/Cucas1/entri
 Then change to the project directory:
 cd entri
 
-**2. Create a Python Virtual Environment**
+**2. Access the .env file and fill it with your ApplicationID and Secret**
+Feel free to use any text editor in your OS like Notepad for Windows or VIM for Linux.
+
+**3. Create a Python Virtual Environment**
 Run the following command to create a virtual environment named .venv:
 python -m venv .venv
 
-
-**3. Activate the Virtual Environment**
+**4. Activate the Virtual Environment**
 Windows
+
 .venv\Scripts\activate
 
 Linux or MacOS
+
 source .venv/bin/activate
 
 
-**4. Install the Application Dependencies**
+**5. Install the Application Dependencies**
 Install the required Python packages using pip:
 pip install -r ./entri_flask/requirements.txt
-
-**5. Access the .env file and fill it with your ApplicationID and Secret**
-Feel free to use any text editor in your OS like Notepad for Windows or VIM for Linux.
 
 **6. Run the Application**
 Start the application by running:
