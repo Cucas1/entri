@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entri Integration</title>
+    <style>
+        /* Style - CSS */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1b1b1b, #2a2a2a);
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1200px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 30px;
+            background: #252525;
+            justify-content: flex-start;
+            align-items: baseline;
+            flex-direction: column;
+        }
+
+        .form-section h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .form-section label {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .form-section input,
+        .form-section textarea,
+        .form-section button {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-section input,
+        .form-section textarea {
+            resize: none;
+            background: #333;
+            color: #fff;
+        }
+
+        .form-section textarea {
+            height: 400px;
+        }
+
+        .form-section button {
+            background: #536dfe;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .form-section button:hover {
+            background: #4054b2;
+        }
+
+        .text-section {
+            flex: 1;
+            padding: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #3a3a3a, #1b1b1b); /* Alternative background */
+        }
+
+        .text-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.ibb.co/Kx3gNvxD/logo.png') no-repeat center/cover;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .text-section h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .text-section p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .text-section .highlight {
+            color: #536dfe;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form -->
+        <div class="form-section">
+            <h1>Connect your Domain</h1>
+            <label for="domainInput">Domain Name:</label>
+            <input type="text" id="domainInput" placeholder="Domain, e.g. mydomainexample.com">
+
+            <label for="dnsRecordsInput">DNS Records (JSON):</label>
+            <textarea id="dnsRecordsInput" rows="10" placeholder='
+            [{ 
+                "type": "CNAME", 
+                "host": "www", 
+                "value": "m.example.com", 
+                "ttl": 300 
+            }]
+            '></textarea>
+
+            <button id="launchEntri">Connect now!</button>
+        </div>
+
+        <!-- Side text -->
+        <div class="text-section">
+            <h1>Seamless Domain Connection</h1>
+            <p>
+                Integrate your domain easily with our <span class="highlight">fast</span> and <span class="highlight">secure</span> platform.
+                Make your setup simple and efficient with full DNS record support.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function getJWT() {
+            try {
+                const response = await fetch('/get_jwt');
+                const data = await response.json();
+
+                if (data.token) {
+                    return data.token;
+                } else {
+                    throw new Error("Failed to retrieve token.");
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('setupResult').textContent = "Error: Failed to load token.";
+            }
+        }
+
+        async function launchEntri() {
+            console.log("Launch Entri clicked");
+
+            const token = await getJWT();
+
+            if (!token) {
+                console.log("No token available");
+                return;
+            }
+
+            let dnsRecords;
+            const dnsRecordsInput = document.getElementById('dnsRecordsInput').value.trim();
+
+            // Verifica se o textarea está vazio
+            if (!dnsRecordsInput) {
+                console.log("DNS Records input is empty, using default values.");
+                dnsRecords = [{
+                        "value": "s.multiscreensite.com",
+                        "host": "www",
+                        "ttl": 300,
+                        "type": "CNAME"
+                    },
+                    {
+                        "value": "35.172.94.1",
+                        "host": "@",
+                        "ttl": 300,
+                        "type": "A"
+                    },
+                    {
+                        "value": "domain-verification=JGNoXe",
+                        "host": "@",
+                        "ttl": 300,
+                        "type": "TXT"
+                    }
+                ];
+            } else {
+                try {
+                    dnsRecords = JSON.parse(dnsRecordsInput);
+                } catch (error) {
+                    console.error("Invalid DNS Records JSON:", error);
+                    alert("Error: Invalid DNS Records. Review your JSON file.");
+                    return;
+                }
+            }
+
+            const domain = document.getElementById('domainInput').value.trim();
+            
+            const wlstr = '{"hideEntriLogo": true, "logo": "https://i.ibb.co/Kx3gNvxD/logo.png", "hideConfetti": true}' //Define whitelabel properties
+            const wlobj = JSON.parse(wlstr) //JSON Object
+
+            const config = {
+                applicationId: "{{ application_id }}",
+                token: token,
+                dnsRecords: dnsRecords,
+                whiteLabel: wlobj
+            };
+
+            if (domain) {
+                config.prefilledDomain = domain;
+            }
+
+            console.log("Entri Config: ", config);
+
+            if (typeof entri !== 'undefined') {
+                console.log("Launching Entri");
+                entri.showEntri(config);
+            } else {
+                console.error("Entri not loaded.");
+                alert("Error: Entri not loaded.");
+            }
+        }
+        
+        document.getElementById('launchEntri').addEventListener('click', launchEntri);
+    </script>
+
+        <script src="https://cdn.goentri.com/entri.js" defer></script>
+</body>
+</html>
